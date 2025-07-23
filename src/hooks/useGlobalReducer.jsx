@@ -1,24 +1,37 @@
-// Import necessary hooks and functions from React.
-import { useContext, useReducer, createContext } from "react";
-import storeReducer, { initialStore } from "../store"  // Import the reducer and the initial state.
+import React, { createContext, useReducer, useContext } from "react";
+import { initialStore, storeReducer } from "../store";
 
-// Create a context to hold the global state of the application
-// We will call this global state the "store" to avoid confusion while using local states
-const StoreContext = createContext()
+export const Context = createContext(null);
 
-// Define a provider component that encapsulates the store and warps it in a context provider to 
-// broadcast the information throught all the app pages and components.
-export function StoreProvider({ children }) {
-    // Initialize reducer with the initial state.
-    const [store, dispatch] = useReducer(storeReducer, initialStore())
-    // Provide the store and dispatch method to all child components.
-    return <StoreContext.Provider value={{ store, dispatch }}>
-        {children}
-    </StoreContext.Provider>
-}
+export const GlobalProvider = ({ children }) => {
+  const [store, dispatch] = useReducer(storeReducer, initialStore);
 
-// Custom hook to access the global state and dispatch function.
-export default function useGlobalReducer() {
-    const { dispatch, store } = useContext(StoreContext)
-    return { dispatch, store };
-}
+  const actions = {
+    loadPeople: async () => {
+      const res = await fetch("https://www.swapi.tech/api/people");
+      const data = await res.json();
+      dispatch({ type: "SET_PEOPLE", payload: data.results });
+    },
+    loadVehicles: async () => {
+      const res = await fetch("https://www.swapi.tech/api/vehicles");
+      const data = await res.json();
+      dispatch({ type: "SET_VEHICLES", payload: data.results });
+    },
+    loadPlanets: async () => {
+      const res = await fetch("https://www.swapi.tech/api/planets");
+      const data = await res.json();
+      dispatch({ type: "SET_PLANETS", payload: data.results });
+    },
+    addFavorite: (item) => dispatch({ type: "ADD_FAVORITE", payload: item }),
+    removeFavorite: (uid) => dispatch({ type: "REMOVE_FAVORITE", payload: uid })
+  };
+
+  return (
+    <Context.Provider value={{ store, actions, dispatch }}>
+      {children}
+    </Context.Provider>
+  );
+};
+
+const useGlobalReducer = () => useContext(Context);
+export default useGlobalReducer;

@@ -1,16 +1,28 @@
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import React, { useContext, useEffect } from "react";
+import { Context } from "../hooks/useGlobalReducer";
+import CardList from "../components/CardList";
 
-export const Home = () => {
+const Home = () => {
+  const { store, actions } = useContext(Context);
 
-  const {store, dispatch} =useGlobalReducer()
+  useEffect(() => {
+    actions.loadPeople();
+    actions.loadVehicles();
+    actions.loadPlanets();
+  }, []);
 
-	return (
-		<div className="text-center mt-5">
-			<h1>Hello Rigo!!</h1>
-			<p>
-				<img src={rigoImageUrl} />
-			</p>
-		</div>
-	);
-}; 
+  return (
+    <div className="container my-4 text-light">
+      <h2>People</h2>
+      <CardList items={store.people} type="people" />
+
+      <h2 className="mt-5">Vehicles</h2>
+      <CardList items={store.vehicles} type="vehicles" />
+
+      <h2 className="mt-5">Planets</h2>
+      <CardList items={store.planets} type="planets" />
+    </div>
+  );
+};
+
+export default Home;
